@@ -1,0 +1,120 @@
+services:
+
+  masterportal:
+    build:
+      context: ./masterportal
+      args:
+        MP_TAG: ${MP_TAG}
+    volumes:
+      - ./masterportal/config/:/usr/share/nginx/html/portal/demo/
+    profiles:
+      - app
+    networks:
+      - app-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.5
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_USER}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres-keycloak
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_METRICS_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: ${HOSTNAME}
+      PROXY_ADDRESS_FORWARDING: "true"
+    profiles:
+      - keycloak
+    depends_on:
+      - postgres-keycloak
+    # use this block for exporting the keycloak configuration
+    # entrypoint: ["/bin/sh", "-c"]
+    # command: ["sleep infinity"]
+    # use this for production setup (needs https)
+    command: start --proxy-headers xforwarded --http-relative-path=/auth --metrics-enabled=true --import-realm --health-enabled=true
+    networks:
+      - app-network
+    healthcheck:
+      test: curl --head -fsS http://localhost:9000/health/ready
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 10s
+
+  postgres-keycloak:
+    image: postgis/postgis:16-3.5-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./postgres-keycloak/init_data:/docker-entrypoint-initdb.d
+      - ./postgres-keycloak/data:/var/lib/postgresql/data
+    profiles:
+      - keycloak
+    networks:
+      - app-network
+
+  postgres:
+    image: postgis/postgis:16-3.5-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./postgres/init_data:/docker-entrypoint-initdb.d
+      - ./postgres/data:/var/lib/postgresql/data
+    profiles:
+      - app
+    networks:
+      - app-network
+
+  postgrest:
+    image: postgrest/postgrest:v12.2.12
+    environment:
+      PGRST_DB_URI: ${PGRST_DB_URI}
+      # TODO check which value should be used here
+      PGRST_OPENAPI_SERVER_PROXY_URI: http://127.0.0.1:3000
+      PGRST_DB_SCHEMAS: ${PGRST_DB_SCHEMAS}
+      PGRST_DB_ANON_ROLE: ${PGRST_DB_ANON_ROLE}
+      PGRST_JWT_SECRET: ${PGRST_JWT_SECRET}
+      PGRST_JWT_ROLE_CLAIM_KEY: ${PGRST_JWT_ROLE_CLAIM_KEY}
+    profiles:
+      - app
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  form-backend:
+    image: ghcr.io/formcapture/form-backend:1.0.1
+    restart: unless-stopped
+    environment:
+      POSTGREST_URL: "http://postgrest:3000"
+      POSTGREST_SCHEMA: ${PGRST_DB_SCHEMAS}
+      POSTGREST_DEFAULT_SCHEMA: ${PGRST_DEFAULT_SCHEMA}
+      POSTGREST_JWT_CLIENT_ID: ${PGRST_KEYCLOAK_CLIENT_ID}
+      POSTGREST_KEYCLOAK_CLIENT_SECRET: ${PGRST_KEYCLOAK_CLIENT_SECRET}
+      FORM_CONFIGS_DIR: "form_configs"
+      FILE_UPLOAD_DIR: ${FB_FILE_UPLOAD_DIR}
+      SIZE_LIMIT: ${FB_SIZE_LIMIT}
+      KC_REALM: ${KEYCLOAK_REALM}
+      KC_AUTH_SERVER_URL: https://${HOSTNAME}/auth
+      KC_CLIENT_APP_ID: ${CLIENT_APP_ID}
+      KC_PUBLIC_KEY: ${KEYCLOAK_PUBLIC_KEY}
+      LOG_LEVEL: 'debug'
+    volumes:
+      - ./form-backend/form_configs:/form-backend/form_configs
+      - ./form-backend/uploads:/form-backend/uploads
+    profiles:
+      - app
+    depends_on:
+      - postgrest
+    networks:
+      - app-network
+
+networks:
+  app-network:

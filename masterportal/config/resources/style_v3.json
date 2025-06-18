@@ -1,0 +1,217 @@
+[
+    {
+        "styleId": "default-blue",
+        "rules": [
+            {
+                "style": {
+                    "polygonStrokeColor": [
+                        44,
+                        127,
+                        184,
+                        1
+                    ],
+                    "polygonStrokeWidth": 2,
+                    "polygonFillColor": [
+                        44,
+                        127,
+                        184,
+                        0.3
+                    ],
+                    "circleFillColor": [
+                        44,
+                        127,
+                        184,
+                        0.5
+                    ],
+                    "circleRadius": 8,
+                    "circleStrokeColor": [
+                        44,
+                        127,
+                        184,
+                        1
+                    ],
+                    "circleStrokeWidth": 4,
+                    "lineStrokeColor": [
+                        44,
+                        127,
+                        184,
+                        1
+                    ],
+                    "lineStrokeWidth": 4
+                }
+            }
+        ]
+    },
+    {
+        "styleId": "draw",
+        "rules": [
+            {
+                "style": {
+                    "polygonStrokeColor": [
+                        49,
+                        163,
+                        84,
+                        1
+                    ],
+                    "polygonStrokeWidth": 2,
+                    "polygonFillColor": [
+                        255,
+                        255,
+                        255,
+                        0
+                    ],
+                    "circleFillColor": [
+                        255,
+                        255,
+                        255,
+                        0
+                    ],
+                    "circleRadius": 5,
+                    "circleStrokeColor": [
+                        49,
+                        163,
+                        84,
+                        1
+                    ],
+                    "circleStrokeWidth": 2,
+                    "lineStrokeColor": [
+                        49,
+                        163,
+                        84,
+                        1
+                    ],
+                    "lineStrokeWidth": 2
+                }
+            }
+        ]
+    },
+    {
+        "styleId": "drawIndicator",
+        "rules": [
+            {
+                "style": {
+                    "polygonStrokeColor": [
+                        153,
+                        115,
+                        0,
+                        1
+                    ],
+                    "polygonStrokeWidth": 2,
+                    "polygonFillColor": [
+                        255,
+                        255,
+                        255,
+                        0.2
+                    ],
+                    "circleFillColor": [
+                        255,
+                        204,
+                        51,
+                        1
+                    ],
+                    "circleRadius": 7,
+                    "circleStrokeColor": [
+                        153,
+                        115,
+                        0,
+                        1
+                    ],
+                    "circleStrokeWidth": 2,
+                    "lineStrokeColor": [
+                        153,
+                        115,
+                        0,
+                        1
+                    ],
+                    "lineStrokeWidth": 2
+                }
+            }
+        ]
+    },
+    {
+        "styleId": "highlight",
+        "rules": [
+            {
+                "style": {
+                    "polygonStrokeColor": [
+                        222,
+                        45,
+                        38,
+                        1
+                    ],
+                    "polygonStrokeWidth": 2,
+                    "polygonFillColor": [
+                        255,
+                        255,
+                        255,
+                        0
+                    ],
+                    "circleFillColor": [
+                        255,
+                        255,
+                        255,
+                        0
+                    ],
+                    "circleRadius": 8,
+                    "circleStrokeColor": [
+                        222,
+                        45,
+                        38,
+                        1
+                    ],
+                    "circleStrokeWidth": 8,
+                    "lineStrokeColor": [
+                        222,
+                        45,
+                        38,
+                        1
+                    ],
+                    "lineStrokeWidth": 8
+                }
+            }
+        ]
+    },
+    {
+        "styleId": "hover",
+        "rules": [
+            {
+                "style": {
+                    "polygonStrokeColor": [
+                        227,
+                        74,
+                        51,
+                        1
+                    ],
+                    "polygonStrokeWidth": 2,
+                    "polygonFillColor": [
+                        227,
+                        74,
+                        51,
+                        0.5
+                    ],
+                    "circleFillColor": [
+                        44,
+                        127,
+                        184,
+                        0.5
+                    ],
+                    "circleRadius": 8,
+                    "circleStrokeColor": [
+                        227,
+                        74,
+                        51,
+                        1
+                    ],
+                    "circleStrokeWidth": 4,
+                    "lineStrokeColor": [
+                        227,
+                        74,
+                        51,
+                        1
+                    ],
+                    "lineStrokeWidth": 4
+                }
+            }
+        ]
+    }
+]

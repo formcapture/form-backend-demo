@@ -1,0 +1,52 @@
+services:
+  form-backend:
+    image: ""
+    build:
+      context: ${FORMCAPTURE_BASE_DIR}/backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "9229:9229"
+    volumes:
+      - ${FORMCAPTURE_BASE_DIR}/backend/:/form-backend
+      - ./form-backend/uploads:/form-backend/uploads
+      - ./form-backend/form_configs:/form-backend/form_configs
+    environment:
+      KC_AUTH_SERVER_URL: https://${HOST_IP}/auth
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+  mkcert:
+    image: vishnunair/docker-mkcert
+    environment:
+      domain: ${HOSTNAME}
+    volumes:
+      - ./nginx/certs/:/root/.local/share/mkcert/
+    command: /bin/sh -c 'mkcert -install && for i in $$(echo $$domain | sed "s/,/ /g"); do [ ! -f /root/.local/share/mkcert/$$i.pem ] && mkcert $$i; done && tail -f -n0 /etc/hosts'
+    profiles:
+      - app
+  nginx:
+    depends_on:
+      - keycloak
+    environment:
+      FORMCAPTURE_HOST: ${HOSTNAME}
+    image: nginx:1.28-alpine-slim
+    networks:
+      - app-network
+    ports:
+      - "443:443"
+      - "80:80"
+    profiles:
+      - app
+    volumes:
+      - ./nginx/proxy_params:/etc/nginx/proxy_params
+      - ./nginx/certs/:/etc/nginx/certs/:ro
+      - ./nginx/gzip.conf:/etc/nginx/gzip.conf
+      - ./nginx/ssl.conf:/etc/nginx/ssl.conf
+      - ./nginx/dev.conf:/etc/nginx/templates/default.conf.template
+  postgres-keycloak:
+    ports:
+      - "5555:5432"
+  postgres:
+    ports:
+      - "5556:5432"
+  keycloak:
+    volumes:
+      - ./keycloak/init_data/:/opt/keycloak/data/import/:ro
