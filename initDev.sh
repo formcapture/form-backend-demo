@@ -65,7 +65,7 @@ echo "# The public key ${KEYCLOAK_PUBLIC_KEY} of the keycloak realm. Can be take
 sed -i '/^KEYCLOAK_PUBLIC_KEY/d' .env
 echo "KEYCLOAK_PUBLIC_KEY=${KEYCLOAK_PUBLIC_KEY}" >> .env
 
-echo "Getting client secret of postrest client..."
+echo "Getting client secret of postgrest client..."
 echo "[*] Authenticating as admin (${KEYCLOAK_USER})..."
 ADMIN_TOKEN=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem -s -X POST "https://${HOSTNAME}/auth/realms/master/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
