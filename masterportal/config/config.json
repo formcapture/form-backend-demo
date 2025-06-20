@@ -1,0 +1,124 @@
+{
+  "portalConfig": {
+    "map": {
+      "layerPills": {
+        "active": true
+      },
+      "mapView": {
+        "startCenter": [
+          366972,
+          5618579
+        ],
+        "extent": [
+          348412,
+          5600130,
+          384869,
+          5640342
+        ],
+        "startZoomLevel": 1,
+        "epsg": "EPSG:25832"
+      },
+      "controls": {
+        "button3d": false,
+        "toggleMenu": true,
+        "buttonOblique": false,
+        "fullScreen": true,
+        "zoom": true,
+        "orientation": "once",
+        "freeze": true,
+        "totalView": true,
+        "backForward": true,
+        "overviewMap": {
+          "resolution": 260,
+          "layerId": "4"
+        },
+        "poi": true,
+        "rotation": {
+          "showResetRotationAlways": true,
+          "rotationIcons": true
+        },
+        "tiltView": true,
+        "startModule": {
+          "secondaryMenu": [
+            {
+              "name": "WMS hinzufügen",
+              "glyphicon": "glyphicon-plus",
+              "type": "addWMS"
+            }
+          ]
+        },
+        "expandable": {}
+      }
+    },
+    "portalFooter": {
+      "urls": [
+        {
+          "bezeichnung": "",
+          "url": "http://terrestris.de",
+          "alias": "Impressum",
+          "alias_mobil": "Impressum |"
+        }
+      ],
+      "scaleLine": true
+    },
+    "tree": {
+      "addLayerButton": {
+        "active": true
+      }
+    },
+    "mainMenu": {
+      "expanded": true,
+      "sections": [
+        [
+          {
+            "type": "embedit",
+            "url": "/form-backend/app/?view=table&formId=fountains",
+            "defaultStyleId": "default-blue",
+            "highlightStyleId": "highlight",
+            "drawStyleId": "draw",
+            "drawIndicatorStyleId": "drawIndicator",
+            "hoverStyleId": "hover",
+            "styleId": ["default-blue", "highlight", "draw", "hover", "drawIndicator"]
+          }
+        ]
+      ],
+      "title": {
+        "logo": "https://www.terrestris.de/wp-content/uploads/2014/03/logo_terrestris_small3.png",
+        "link": "https://www.terrestris.de/",
+        "toolTip": "terrestris",
+        "text": "Webseminar"
+      },
+      "searchBar": {
+        "searchInterfaces": [
+        ]
+      }
+    },
+    "secondaryMenu": {
+      "expanded": false,
+      "sections": [
+        [
+          {
+            "type": "addWMS"
+          }
+        ]
+      ]
+    }
+  },
+  "layerConfig": {
+    "baselayer": {
+      "elements": [
+        {
+          "id": "3",
+          "visibility": true
+        }
+      ]
+    },
+    "subjectlayer": {
+      "elements": [
+        {
+          "id": "4"
+        }
+      ]
+    }
+  }
+}

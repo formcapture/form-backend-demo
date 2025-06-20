@@ -1,0 +1,12 @@
+postgres/data
+postgres-keycloak/data
+.env
+coverage
+!keycloak/init_data/keycloak_masterportal_realm.json
+nginx/certs/*
+!nginx/certs/.gitkeep
+form-backend/uploads
+
+# IntelliJ IDEA
+.idea
+*.iml
