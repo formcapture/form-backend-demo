@@ -37,7 +37,8 @@ const Config = {
       en: "English",
     },
     fallbackLanguage: "de",
-    changeLanguageOnStartWhen: ["querystring", "localStorage", "htmlTag"]
+    changeLanguageOnStartWhen: ["querystring", "localStorage", "htmlTag"],
+    loadPath: "/portal/mastercode/3_11_0/locales/{{lng}}/{{ns}}.json"
   }
 };
 

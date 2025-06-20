@@ -30,7 +30,7 @@ FROM nginx:1.28.0-alpine-slim@sha256:39a9a15e0a81914a96fa9ffa980cdfe08e2e5e73ae3
 ARG GIT_COMMIT
 ARG APP_VERSION
 
-COPY --from=build /masterportal/dist/mastercode /usr/share/nginx/html/portal/
+COPY --from=build /masterportal/dist/mastercode /usr/share/nginx/html/portal/mastercode
 COPY default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
