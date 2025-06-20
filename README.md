@@ -51,5 +51,8 @@ sudo update-ca-certificates --fresh
 
 ## Integrate with Masterportal
 
-1. Create a Masterportal instance that contains https://github.com/formcapture/masterportal-addons
-1. Adjust your Masterportal configuration to include the addon with one of the links above
+A basic demo config is included to demonstrate the integration with a Masterportal instance: `https://localhost/portal/demo/`.
+
+### Configuration
+
+Please have a look at `masterportal/config/config.json` for an example. Docs can be found in the addon repository: https://github.com/formcapture/masterportal-addons/tree/main/addons/embedit
