@@ -2,11 +2,11 @@ services:
 
   masterportal:
     build:
-      context: ./masterportal
+      context:  ${PWD}/masterportal
       args:
         MP_TAG: ${MP_TAG}
     volumes:
-      - ./masterportal/config/:/usr/share/nginx/html/portal/demo/
+      - ${PWD}/masterportal/config/:/usr/share/nginx/html/portal/demo/
     profiles:
       - app
     networks:
@@ -52,8 +52,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ./postgres-keycloak/init_data:/docker-entrypoint-initdb.d
-      - ./postgres-keycloak/data:/var/lib/postgresql/data
+      - ${PWD}/postgres-keycloak/init_data:/docker-entrypoint-initdb.d
+      - ${PWD}/postgres-keycloak/data:/var/lib/postgresql/data
     profiles:
       - keycloak
     networks:
@@ -65,8 +65,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ./postgres/init_data:/docker-entrypoint-initdb.d
-      - ./postgres/data:/var/lib/postgresql/data
+      - ${PWD}/postgres/init_data:/docker-entrypoint-initdb.d
+      - ${PWD}/postgres/data:/var/lib/postgresql/data
     profiles:
       - app
     networks:
@@ -107,8 +107,8 @@ services:
       KC_PUBLIC_KEY: ${KEYCLOAK_PUBLIC_KEY}
       LOG_LEVEL: 'debug'
     volumes:
-      - ./form-backend/form_configs:/form-backend/form_configs
-      - ./form-backend/uploads:/form-backend/uploads
+      - ${PWD}/form-backend/form_configs:/form-backend/form_configs
+      - ${PWD}/form-backend/uploads:/form-backend/uploads
     profiles:
       - app
     depends_on:
