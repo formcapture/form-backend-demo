@@ -8,8 +8,8 @@ services:
       - "9229:9229"
     volumes:
       - ${FORMCAPTURE_BASE_DIR}/backend/:/form-backend
-      - ./form-backend/uploads:/form-backend/uploads
-      - ./form-backend/form_configs:/form-backend/form_configs
+      - ${PWD}/form-backend/uploads:/form-backend/uploads
+      - ${PWD}/form-backend/form_configs:/form-backend/form_configs
     environment:
       KC_AUTH_SERVER_URL: https://${HOST_IP}/auth
       NODE_TLS_REJECT_UNAUTHORIZED: 0
@@ -18,7 +18,7 @@ services:
     environment:
       domain: ${HOSTNAME}
     volumes:
-      - ./nginx/certs/:/root/.local/share/mkcert/
+      - ${PWD}/nginx/certs/:/root/.local/share/mkcert/
     command: /bin/sh -c 'mkcert -install && for i in $$(echo $$domain | sed "s/,/ /g"); do [ ! -f /root/.local/share/mkcert/$$i.pem ] && mkcert $$i; done && tail -f -n0 /etc/hosts'
     profiles:
       - app
@@ -36,11 +36,11 @@ services:
     profiles:
       - app
     volumes:
-      - ./nginx/proxy_params:/etc/nginx/proxy_params
-      - ./nginx/certs/:/etc/nginx/certs/:ro
-      - ./nginx/gzip.conf:/etc/nginx/gzip.conf
-      - ./nginx/ssl.conf:/etc/nginx/ssl.conf
-      - ./nginx/dev.conf:/etc/nginx/templates/default.conf.template
+      - ${PWD}/nginx/proxy_params:/etc/nginx/proxy_params
+      - ${PWD}/nginx/certs/:/etc/nginx/certs/:ro
+      - ${PWD}/nginx/gzip.conf:/etc/nginx/gzip.conf
+      - ${PWD}/nginx/ssl.conf:/etc/nginx/ssl.conf
+      - ${PWD}/nginx/dev.conf:/etc/nginx/templates/default.conf.template
   postgres-keycloak:
     ports:
       - "5555:5432"
@@ -49,4 +49,4 @@ services:
       - "5556:5432"
   keycloak:
     volumes:
-      - ./keycloak/init_data/:/opt/keycloak/data/import/:ro
+      - ${PWD}/keycloak/init_data/:/opt/keycloak/data/import/:ro
