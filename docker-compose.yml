@@ -73,7 +73,7 @@ services:
       - app-network
 
   postgrest:
-    image: postgrest/postgrest:v12.2.12
+    image: postgrest/postgrest:v13.0.4
     environment:
       PGRST_DB_URI: ${PGRST_DB_URI}
       # TODO check which value should be used here
