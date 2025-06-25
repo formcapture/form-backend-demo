@@ -8,8 +8,12 @@ updates:
     open-pull-requests-limit: 10
   - package-ecosystem: "docker"
     directories:
-      - "/"
       - "/masterportal"
+    schedule:
+      interval: "daily"
+      time: "00:00"
+  - package-ecosystem: "docker-compose"
+    directory: "/"
     schedule:
       interval: "daily"
       time: "00:00"
