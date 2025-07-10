@@ -1,5 +1,5 @@
 # build stage
-FROM node:20.19.2-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8 AS build
+FROM node:24.4.0-alpine@sha256:22b3c1a1171c798c0429f36272922dbb356bbab8a6d11b3b095a143d3321262a AS build
 
 # libs are needed to build the masterportal
 RUN apk update && apk add --no-cache --virtual .gyp \
