@@ -43,7 +43,7 @@ services:
       timeout: 10s
 
   postgres-keycloak:
-    image: postgis/postgis:16-3.5-alpine
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -54,7 +54,7 @@ services:
       - app-network
 
   postgres:
-    image: postgis/postgis:16-3.5-alpine
+    image: postgis/postgis:17-3.5-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
