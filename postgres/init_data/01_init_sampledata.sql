@@ -185,21 +185,14 @@ COPY sampledata.fountains (id, name, type, geom) FROM stdin;
 50	Quellbrunnen	1	0101000000295C8FC287821641D3F1F9285D725541
 \.
 
-SELECT setval('sampledata.fountains_id_seq', 3, true);
+SELECT setval('sampledata.fountains_id_seq', 51, true);
 
 COPY sampledata.fountains_contacts (fountain_id, contact_id) FROM stdin;
 1	1
-1	2
 2	1
+1	2
+3	3
 3	1
-3	2
-4	2
-5	1
-5	3
-6	1
-7	2
-7	3
-8	1
 \.
 
 ALTER TABLE ONLY sampledata.fountain_types
