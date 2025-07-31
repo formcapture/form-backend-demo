@@ -7,8 +7,6 @@ services:
         MP_TAG: ${MP_TAG}
     volumes:
       - ${PWD}/masterportal/config/:/usr/share/nginx/html/portal/demo/
-    profiles:
-      - app
     networks:
       - app-network
 
@@ -28,8 +26,6 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME: ${HOSTNAME}
       PROXY_ADDRESS_FORWARDING: "true"
-    profiles:
-      - keycloak
     depends_on:
       - postgres-keycloak
     # use this block for exporting the keycloak configuration
@@ -54,8 +50,6 @@ services:
     volumes:
       - ${PWD}/postgres-keycloak/init_data:/docker-entrypoint-initdb.d
       - ${PWD}/postgres-keycloak/data:/var/lib/postgresql/data
-    profiles:
-      - keycloak
     networks:
       - app-network
 
@@ -67,8 +61,6 @@ services:
     volumes:
       - ${PWD}/postgres/init_data:/docker-entrypoint-initdb.d
       - ${PWD}/postgres/data:/var/lib/postgresql/data
-    profiles:
-      - app
     networks:
       - app-network
 
@@ -82,8 +74,6 @@ services:
       PGRST_DB_ANON_ROLE: ${PGRST_DB_ANON_ROLE}
       PGRST_JWT_SECRET: ${PGRST_JWT_SECRET}
       PGRST_JWT_ROLE_CLAIM_KEY: ${PGRST_JWT_ROLE_CLAIM_KEY}
-    profiles:
-      - app
     depends_on:
       - postgres
     networks:
