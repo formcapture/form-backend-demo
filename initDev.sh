@@ -35,7 +35,6 @@ if [ -z "$FORMCAPTURE_BASE_DIR" ]; then
   read -p "Enter the base directory of formcapture form-backend: " FORMCAPTURE_BASE_DIR
 fi
 
-echo "# The location to checkout of formcapture form-backend" >> .env
 sed -i -E "s/FORMCAPTURE_BASE_DIR=(.+)/FORMCAPTURE_BASE_DIR=$(echo $FORMCAPTURE_BASE_DIR | sed 's_/_\\/_g')/" .env
 
 # load predefined environment variables from .env file
@@ -47,7 +46,7 @@ set +o allexport
 docker compose up -d
 
 echo "Waiting for keycloak to become healthy 😴..."
-until docker compose ps | grep keycloak | grep -q "healthy"; do
+until docker compose ps | grep keycloak | grep -q "(healthy)"; do
   sleep 5
   echo "Waiting 5 sec for keycloak health check ⏱️..."
 done

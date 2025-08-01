@@ -20,8 +20,6 @@ services:
     volumes:
       - ${PWD}/nginx/certs/:/root/.local/share/mkcert/
     command: /bin/sh -c 'mkcert -install && for i in $$(echo $$domain | sed "s/,/ /g"); do [ ! -f /root/.local/share/mkcert/$$i.pem ] && mkcert $$i; done && tail -f -n0 /etc/hosts'
-    profiles:
-      - app
   nginx:
     depends_on:
       - keycloak
@@ -33,8 +31,6 @@ services:
     ports:
       - "443:443"
       - "80:80"
-    profiles:
-      - app
     volumes:
       - ${PWD}/nginx/proxy_params:/etc/nginx/proxy_params
       - ${PWD}/nginx/certs/:/etc/nginx/certs/:ro

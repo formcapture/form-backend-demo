@@ -7,8 +7,6 @@ services:
         MP_TAG: ${MP_TAG}
     volumes:
       - ${PWD}/masterportal/config/:/usr/share/nginx/html/portal/demo/
-    profiles:
-      - app
     networks:
       - app-network
 
@@ -28,8 +26,6 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME: ${HOSTNAME}
       PROXY_ADDRESS_FORWARDING: "true"
-    profiles:
-      - keycloak
     depends_on:
       - postgres-keycloak
     # use this block for exporting the keycloak configuration
@@ -40,35 +36,31 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: curl --head -fsS http://localhost:9000/health/ready
-      interval: 10s
+      test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { java.net.URI uri = java.net.URI.create(args[0]); System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)uri.toURL().openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:9000/auth/health/live']
+      interval: 5s
       retries: 5
       start_period: 5s
       timeout: 10s
 
   postgres-keycloak:
-    image: postgis/postgis:16-3.5-alpine
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ${PWD}/postgres-keycloak/init_data:/docker-entrypoint-initdb.d
       - ${PWD}/postgres-keycloak/data:/var/lib/postgresql/data
-    profiles:
-      - keycloak
     networks:
       - app-network
 
   postgres:
-    image: postgis/postgis:16-3.5-alpine
+    image: postgis/postgis:17-3.5-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ${PWD}/postgres/init_data:/docker-entrypoint-initdb.d
       - ${PWD}/postgres/data:/var/lib/postgresql/data
-    profiles:
-      - app
     networks:
       - app-network
 
@@ -82,8 +74,6 @@ services:
       PGRST_DB_ANON_ROLE: ${PGRST_DB_ANON_ROLE}
       PGRST_JWT_SECRET: ${PGRST_JWT_SECRET}
       PGRST_JWT_ROLE_CLAIM_KEY: ${PGRST_JWT_ROLE_CLAIM_KEY}
-    profiles:
-      - app
     depends_on:
       - postgres
     networks:
