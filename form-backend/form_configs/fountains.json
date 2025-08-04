@@ -24,8 +24,8 @@
     "pageSize": 5
   },
   "access": {
-    "read": true,
-    "write": true
+    "read": ["fountains_editor"],
+    "write": ["fountains_editor"]
   },
   "properties": {
     "type": {

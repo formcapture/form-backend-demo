@@ -9,6 +9,6 @@
   },
   "access": {
     "read": true,
-    "write": true
+    "write": ["fountains_editor"]
   }
 }
