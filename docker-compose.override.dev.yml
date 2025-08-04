@@ -53,3 +53,6 @@ services:
   keycloak:
     volumes:
       - ${PWD}/keycloak/init_data/:/opt/keycloak/data/import/:ro
+  postgrest:
+    environment:
+      PGRST_LOG_LEVEL: "debug"
