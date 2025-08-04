@@ -14,6 +14,7 @@ services:
       KC_AUTH_SERVER_URL: https://${HOST_IP}/auth
       NODE_TLS_REJECT_UNAUTHORIZED: 0
   mkcert:
+    container_name: ${COMPOSE_PROJECT_NAME}-mkcert
     image: vishnunair/docker-mkcert
     environment:
       domain: ${HOSTNAME}
@@ -25,6 +26,7 @@ services:
       interval: 5s
       start_period: 2s
   nginx:
+    container_name: ${COMPOSE_PROJECT_NAME}-nginx
     depends_on:
       - mkcert
       - keycloak
@@ -42,10 +44,10 @@ services:
       - ${PWD}/nginx/gzip.conf:/etc/nginx/gzip.conf
       - ${PWD}/nginx/ssl.conf:/etc/nginx/ssl.conf
       - ${PWD}/nginx/dev.conf:/etc/nginx/templates/default.conf.template
-  postgres-keycloak:
+  keycloak-db:
     ports:
       - "5555:5432"
-  postgres:
+  db:
     ports:
       - "6666:5432"
   keycloak:

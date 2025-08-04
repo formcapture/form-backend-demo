@@ -1,6 +1,7 @@
 services:
 
   masterportal:
+    container_name: ${COMPOSE_PROJECT_NAME}-masterportal
     build:
       context:  ${PWD}/masterportal
       args:
@@ -11,12 +12,13 @@ services:
       - app-network
 
   keycloak:
+    container_name: ${COMPOSE_PROJECT_NAME}-keycloak
     image: quay.io/keycloak/keycloak:26.2.5
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_USER}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
       KC_DB: postgres
-      KC_DB_URL_HOST: postgres-keycloak
+      KC_DB_URL_HOST: keycloak-db
       KC_DB_URL_PORT: 5432
       KC_DB_URL_DATABASE: keycloak
       KC_DB_USERNAME: ${POSTGRES_USER}
@@ -27,7 +29,7 @@ services:
       KC_HOSTNAME: ${HOSTNAME}
       PROXY_ADDRESS_FORWARDING: "true"
     depends_on:
-      - postgres-keycloak
+       - keycloak-db
     # use this block for exporting the keycloak configuration
     # entrypoint: ["/bin/sh", "-c"]
     # command: ["sleep infinity"]
@@ -42,7 +44,8 @@ services:
       start_period: 5s
       timeout: 10s
 
-  postgres-keycloak:
+  keycloak-db:
+    container_name: ${COMPOSE_PROJECT_NAME}-keycloak-db
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -53,7 +56,8 @@ services:
     networks:
       - app-network
 
-  postgres:
+  db:
+    container_name: ${COMPOSE_PROJECT_NAME}-db
     image: postgis/postgis:17-3.5-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -75,27 +79,28 @@ services:
       PGRST_JWT_SECRET: ${PGRST_JWT_SECRET}
       PGRST_JWT_ROLE_CLAIM_KEY: ${PGRST_JWT_ROLE_CLAIM_KEY}
     depends_on:
-      - postgres
+      - db
     networks:
       - app-network
 
   form-backend:
+    container_name: ${COMPOSE_PROJECT_NAME}-form-backend
     image: ghcr.io/formcapture/form-backend:1.1.0
     restart: unless-stopped
     environment:
-      POSTGREST_URL: "http://postgrest:3000"
-      POSTGREST_SCHEMA: ${PGRST_DB_SCHEMAS}
-      POSTGREST_DEFAULT_SCHEMA: ${PGRST_DEFAULT_SCHEMA}
-      POSTGREST_JWT_CLIENT_ID: ${PGRST_KEYCLOAK_CLIENT_ID}
-      POSTGREST_KEYCLOAK_CLIENT_SECRET: ${PGRST_KEYCLOAK_CLIENT_SECRET}
-      FORM_CONFIGS_DIR: "form_configs"
       FILE_UPLOAD_DIR: ${FB_FILE_UPLOAD_DIR}
-      SIZE_LIMIT: ${FB_SIZE_LIMIT}
-      KC_REALM: ${KEYCLOAK_REALM}
+      FORM_CONFIGS_DIR: "form_configs"
       KC_AUTH_SERVER_URL: https://${HOSTNAME}/auth
       KC_CLIENT_APP_ID: ${CLIENT_APP_ID}
       KC_PUBLIC_KEY: ${KEYCLOAK_PUBLIC_KEY}
+      KC_REALM: ${KEYCLOAK_REALM}
       LOG_LEVEL: 'debug'
+      POSTGREST_DEFAULT_SCHEMA: ${PGRST_DEFAULT_SCHEMA}
+      POSTGREST_JWT_CLIENT_ID: ${PGRST_KEYCLOAK_CLIENT_ID}
+      POSTGREST_KEYCLOAK_CLIENT_SECRET: ${PGRST_KEYCLOAK_CLIENT_SECRET}
+      POSTGREST_SCHEMA: ${PGRST_DB_SCHEMAS}
+      POSTGREST_URL: "http://postgrest:3000"
+      SIZE_LIMIT: ${FB_SIZE_LIMIT}
     volumes:
       - ${PWD}/form-backend/form_configs:/form-backend/form_configs
       - ${PWD}/form-backend/uploads:/form-backend/uploads

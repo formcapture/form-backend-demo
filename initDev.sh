@@ -109,7 +109,7 @@ sed -i -E "s/PGRST_KEYCLOAK_CLIENT_SECRET=(.+)/PGRST_KEYCLOAK_CLIENT_SECRET=${LO
 
 echo "Setting up authenticator user in postgres 🔑 ..."
 ESCAPED_PGRST_PASSWORD=$(printf '%s' "$PGRST_DB_PASSWORD" | sed "s/'/''/g")
-docker compose exec postgres psql -U postgres -c "ALTER USER authenticator WITH PASSWORD '${ESCAPED_PGRST_PASSWORD}';"
+docker compose exec db psql -U postgres -c "ALTER USER authenticator WITH PASSWORD '${ESCAPED_PGRST_PASSWORD}';"
 
 docker compose down
 echo "Project initialized successfully! 🎉"
