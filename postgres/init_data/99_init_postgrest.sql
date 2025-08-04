@@ -11,6 +11,6 @@ grant SELECT, INSERT, UPDATE, DELETE on all tables in schema sampledata to formb
 grant all on all sequences in schema sampledata to formbackend;
 
 -- password will be replaced by init script
-create role authenticator noinherit login password 'Remm(quemtyikIcNetutOajIjOtUd0';
+create role authenticator noinherit login password 'letmein';
 grant web_anon to authenticator;
 grant formbackend to authenticator;

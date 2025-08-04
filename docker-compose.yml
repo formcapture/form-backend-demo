@@ -99,8 +99,6 @@ services:
     volumes:
       - ${PWD}/form-backend/form_configs:/form-backend/form_configs
       - ${PWD}/form-backend/uploads:/form-backend/uploads
-    profiles:
-      - app
     depends_on:
       - postgrest
     networks:

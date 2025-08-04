@@ -45,10 +45,16 @@ set +o allexport
 
 docker compose up -d
 
+sleep 2
+
 echo "Waiting for keycloak to become healthy 😴..."
 until docker compose ps | grep keycloak | grep -q "(healthy)"; do
   sleep 5
   echo "Waiting 5 sec for keycloak health check ⏱️..."
+  if ! docker compose ps | grep nginx | grep -q "Up"; then
+    echo "nginx is not running. Starting nginx with docker compose..."
+    docker compose up -d nginx
+  fi
 done
 
 echo "Getting jwt secret..."
