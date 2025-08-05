@@ -10,8 +10,11 @@ services:
       - ${FORMCAPTURE_BASE_DIR}/backend/:/form-backend
       - ${PWD}/form-backend/uploads:/form-backend/uploads
       - ${PWD}/form-backend/form_configs:/form-backend/form_configs
+    extra_hosts:
+      - "auth.form-backend.local:${HOST_IP}"
+      - "app.form-backend.local:${HOST_IP}"
     environment:
-      KC_AUTH_SERVER_URL: https://${HOST_IP}/auth
+      KC_AUTH_SERVER_URL: https://auth.${HOSTNAME}/auth
       NODE_TLS_REJECT_UNAUTHORIZED: 0
   mkcert:
     container_name: ${COMPOSE_PROJECT_NAME}-mkcert
@@ -20,9 +23,9 @@ services:
       domain: ${HOSTNAME}
     volumes:
       - ${PWD}/nginx/certs/:/root/.local/share/mkcert/
-    command: /bin/sh -c 'mkcert -install && for i in $$(echo $$domain | sed "s/,/ /g"); do [ ! -f /root/.local/share/mkcert/$$i.pem ] && mkcert $$i; done && tail -f -n0 /etc/hosts'
+    command: /bin/sh -c 'mkcert -install "*.form-backend.local" && for i in $$(echo $$domain | sed "s/,/ /g"); do [ ! -f /root/.local/share/mkcert/$$i.pem ] && mkcert $$i; done && tail -f -n0 /etc/hosts'
     healthcheck:
-      test: ["CMD", "test", "-f", "/root/.local/share/mkcert/localhost.pem"]
+      test: ["CMD", "test", "-f", "/root/.local/share/mkcert/${HOSTNAME}.pem"]
       interval: 5s
       start_period: 2s
   nginx:
@@ -53,6 +56,12 @@ services:
   keycloak:
     volumes:
       - ${PWD}/keycloak/init_data/:/opt/keycloak/data/import/:ro
+    environment:
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HOSTNAME: auth.${HOSTNAME}
+      KC_CHECK_LOGIN_IFRAME: "false"
+      KC_PROXY_HEADERS: "xforwarded"
   postgrest:
     environment:
       PGRST_LOG_LEVEL: "debug"

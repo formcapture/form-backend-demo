@@ -9,12 +9,12 @@
     * Alternatively, you can pass the path as an argument: `./initDev.sh --form-backend-base=<<my-checkout>>/formcapture/form-backend`
     * If you want to re-initialize the setup, you have to clean up the setup before e.g., by running `docker compose down --remove-orphans ; sudo rm -rf postgres/data postgres-keycloak/data .env` to remove containers, existing databases and `.env` files.
 1. Run `docker compose up -d` to start the setup.
-    * During the first run, a ssl certificate for your local development is created and saved in `nginx/certs` (depending on your hostname, default: `localhost`).
+    * During the first run, a ssl certificate for your local development is created and saved in `nginx/certs`.
 1. Ensure sufficient permissions for `./form-backend/uploads/` (e.g. `chmod -R 777 form-backend/uploads`)
 
 ## Run Application
 
-1. The application will be running on `https://localhost/form-backend/app/?formId=fountains_minimal&view=table`
+1. The application will be running on https://app.form-backend.local/form-backend/app/?formId=fountains_minimal&view=table`
 
 The following applications are included:
 - `/form-backend/app/?formId=fountains_minimal&view=table` - minimal configuration
@@ -40,13 +40,19 @@ sudo update-ca-certificates
 Use curl to test the connection. If everything is set up correctly, there should be no SSL errors:
 
 ```bash
-curl https://localhost/form-backend/form/fountains
+curl https://app.form-backend.local/form-backend/form/fountains_minimal
 ```
 
 4. Removal of the Root Certificate (if not needed anymore)
 ```
 sudo rm /usr/local/share/ca-certificates/rootCA.crt
 sudo update-ca-certificates --fresh
+```
+
+5. Add the following line to your `/etc/hosts` file:
+```
+127.0.0.1  auth.form-backend.local
+127.0.0.1  app.form-backend.local
 ```
 
 ## Integrate with Masterportal

@@ -58,21 +58,21 @@ until docker compose ps | grep keycloak | grep -q "(healthy)"; do
 done
 
 echo "Getting jwt secret..."
-LOADED_PGRST_JWT_SECRET=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem https://${HOSTNAME}/auth/realms/masterportal/protocol/openid-connect/certs)
+LOADED_PGRST_JWT_SECRET=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem https://auth.${HOSTNAME}/auth/realms/masterportal/protocol/openid-connect/certs)
 LOADED_PGRST_JWT_SECRET_ESCAPED=$(echo ${LOADED_PGRST_JWT_SECRET} | sed 's/"/\\"/g')
-echo "# The secret for verifying the jwt token. Can be taken from /auth/realms/masterportal/protocol/openid-connect/certs"
+echo "# The secret for verifying the jwt token. Can be taken from auth//realms/masterportal/protocol/openid-connect/certs"
 sed -i '/^PGRST_JWT_SECRET/d' .env
 echo "PGRST_JWT_SECRET=\"${LOADED_PGRST_JWT_SECRET_ESCAPED}\"" >> .env
 
 echo "Getting keycloak public key..."
-KEYCLOAK_PUBLIC_KEY=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem https://${HOSTNAME}/auth/realms/masterportal | jq '.public_key')
+KEYCLOAK_PUBLIC_KEY=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem https://auth.${HOSTNAME}/auth/realms/masterportal | jq '.public_key')
 echo "# The public key ${KEYCLOAK_PUBLIC_KEY} of the keycloak realm. Can be taken from /auth/realms/masterportal"
 sed -i '/^KEYCLOAK_PUBLIC_KEY/d' .env
 echo "KEYCLOAK_PUBLIC_KEY=${KEYCLOAK_PUBLIC_KEY}" >> .env
 
 echo "Getting client secret of postgrest client..."
 echo "[*] Authenticating as admin (${KEYCLOAK_USER})..."
-ADMIN_TOKEN=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem -s -X POST "https://${HOSTNAME}/auth/realms/master/protocol/openid-connect/token" \
+ADMIN_TOKEN=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem -s -X POST "https://auth.${HOSTNAME}/auth/realms/master/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=${KEYCLOAK_USER}" \
   -d "password=${KEYCLOAK_PASSWORD}" \
@@ -85,7 +85,7 @@ if [[ -z "$ADMIN_TOKEN" || "$ADMIN_TOKEN" == "null" ]]; then
 fi
 
 echo "[*] Searching for client ID of '$PGRST_KEYCLOAK_CLIENT_ID' in realm '$KEYCLOAK_REALM'..."
-CLIENT_UUID=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem -s -X GET "https://${HOSTNAME}/auth/admin/realms/${KEYCLOAK_REALM}/clients?clientId=${PGRST_KEYCLOAK_CLIENT_ID}" \
+CLIENT_UUID=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem -s -X GET "https://auth.${HOSTNAME}/auth/admin/realms/${KEYCLOAK_REALM}/clients?clientId=${PGRST_KEYCLOAK_CLIENT_ID}" \
   -H "Authorization: Bearer $ADMIN_TOKEN" | jq -r '.[0].id')
 
 if [[ -z "$CLIENT_UUID" || "$CLIENT_UUID" == "null" ]]; then
@@ -96,7 +96,7 @@ fi
 echo "[+] Client-UUID: $CLIENT_UUID"
 
 echo "[*] Load secret for client '$PGRST_KEYCLOAK_CLIENT_ID'..."
-CLIENT_SECRET=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem -s -X GET "https://${HOSTNAME}/auth/admin/realms/${KEYCLOAK_REALM}/clients/${CLIENT_UUID}/client-secret" \
+CLIENT_SECRET=$(curl --cacert $(pwd)/nginx/certs/rootCA.pem -s -X GET "https://auth.${HOSTNAME}/auth/admin/realms/${KEYCLOAK_REALM}/clients/${CLIENT_UUID}/client-secret" \
   -H "Authorization: Bearer $ADMIN_TOKEN" | jq -r '.value')
 
 if [[ -z "$CLIENT_SECRET" || "$CLIENT_SECRET" == "null" ]]; then
