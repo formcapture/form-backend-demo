@@ -90,7 +90,7 @@ services:
       - app-network
 
   form-backend:
-    image: ghcr.io/formcapture/form-backend:1.1.0
+    image: ghcr.io/formcapture/form-backend:2.1.0
     restart: unless-stopped
     environment:
       POSTGREST_URL: "http://postgrest:3000"
