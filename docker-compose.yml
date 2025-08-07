@@ -1,24 +1,24 @@
 services:
 
   masterportal:
+    container_name: ${COMPOSE_PROJECT_NAME}-masterportal
     build:
       context:  ${PWD}/masterportal
       args:
         MP_TAG: ${MP_TAG}
     volumes:
       - ${PWD}/masterportal/config/:/usr/share/nginx/html/portal/demo/
-    profiles:
-      - app
     networks:
       - app-network
 
   keycloak:
+    container_name: ${COMPOSE_PROJECT_NAME}-keycloak
     image: quay.io/keycloak/keycloak:26.2.5
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_USER}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
       KC_DB: postgres
-      KC_DB_URL_HOST: postgres-keycloak
+      KC_DB_URL_HOST: keycloak-db
       KC_DB_URL_PORT: 5432
       KC_DB_URL_DATABASE: keycloak
       KC_DB_USERNAME: ${POSTGRES_USER}
@@ -28,10 +28,8 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME: ${HOSTNAME}
       PROXY_ADDRESS_FORWARDING: "true"
-    profiles:
-      - keycloak
     depends_on:
-      - postgres-keycloak
+       - keycloak-db
     # use this block for exporting the keycloak configuration
     # entrypoint: ["/bin/sh", "-c"]
     # command: ["sleep infinity"]
@@ -40,40 +38,39 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: curl --head -fsS http://localhost:9000/health/ready
-      interval: 10s
+      test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { java.net.URI uri = java.net.URI.create(args[0]); System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)uri.toURL().openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:9000/auth/health/live']
+      interval: 5s
       retries: 5
       start_period: 5s
       timeout: 10s
 
-  postgres-keycloak:
-    image: postgis/postgis:16-3.5-alpine
+  keycloak-db:
+    container_name: ${COMPOSE_PROJECT_NAME}-keycloak-db
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ${PWD}/postgres-keycloak/init_data:/docker-entrypoint-initdb.d
       - ${PWD}/postgres-keycloak/data:/var/lib/postgresql/data
-    profiles:
-      - keycloak
     networks:
       - app-network
 
-  postgres:
-    image: postgis/postgis:16-3.5-alpine
+  db:
+    container_name: ${COMPOSE_PROJECT_NAME}-db
+    image: postgis/postgis:17-3.5-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ${PWD}/postgres/init_data:/docker-entrypoint-initdb.d
       - ${PWD}/postgres/data:/var/lib/postgresql/data
-    profiles:
-      - app
     networks:
       - app-network
 
   postgrest:
-    image: postgrest/postgrest:v12.2.12
+    container_name: ${COMPOSE_PROJECT_NAME}-postgrest
+    image: postgrest/postgrest:v13.0.4
     environment:
       PGRST_DB_URI: ${PGRST_DB_URI}
       # TODO check which value should be used here
@@ -82,35 +79,32 @@ services:
       PGRST_DB_ANON_ROLE: ${PGRST_DB_ANON_ROLE}
       PGRST_JWT_SECRET: ${PGRST_JWT_SECRET}
       PGRST_JWT_ROLE_CLAIM_KEY: ${PGRST_JWT_ROLE_CLAIM_KEY}
-    profiles:
-      - app
     depends_on:
-      - postgres
+      - db
     networks:
       - app-network
 
   form-backend:
-    image: ghcr.io/formcapture/form-backend:1.1.0
+    container_name: ${COMPOSE_PROJECT_NAME}-form-backend
+    image: ghcr.io/formcapture/form-backend:2.1.0
     restart: unless-stopped
     environment:
-      POSTGREST_URL: "http://postgrest:3000"
-      POSTGREST_SCHEMA: ${PGRST_DB_SCHEMAS}
-      POSTGREST_DEFAULT_SCHEMA: ${PGRST_DEFAULT_SCHEMA}
-      POSTGREST_JWT_CLIENT_ID: ${PGRST_KEYCLOAK_CLIENT_ID}
-      POSTGREST_KEYCLOAK_CLIENT_SECRET: ${PGRST_KEYCLOAK_CLIENT_SECRET}
-      FORM_CONFIGS_DIR: "form_configs"
       FILE_UPLOAD_DIR: ${FB_FILE_UPLOAD_DIR}
-      SIZE_LIMIT: ${FB_SIZE_LIMIT}
-      KC_REALM: ${KEYCLOAK_REALM}
+      FORM_CONFIGS_DIR: "form_configs"
       KC_AUTH_SERVER_URL: https://${HOSTNAME}/auth
       KC_CLIENT_APP_ID: ${CLIENT_APP_ID}
       KC_PUBLIC_KEY: ${KEYCLOAK_PUBLIC_KEY}
+      KC_REALM: ${KEYCLOAK_REALM}
       LOG_LEVEL: 'debug'
+      POSTGREST_DEFAULT_SCHEMA: ${PGRST_DEFAULT_SCHEMA}
+      POSTGREST_JWT_CLIENT_ID: ${PGRST_KEYCLOAK_CLIENT_ID}
+      POSTGREST_KEYCLOAK_CLIENT_SECRET: ${PGRST_KEYCLOAK_CLIENT_SECRET}
+      POSTGREST_SCHEMA: ${PGRST_DB_SCHEMAS}
+      POSTGREST_URL: "http://postgrest:3000"
+      SIZE_LIMIT: ${FB_SIZE_LIMIT}
     volumes:
       - ${PWD}/form-backend/form_configs:/form-backend/form_configs
       - ${PWD}/form-backend/uploads:/form-backend/uploads
-    profiles:
-      - app
     depends_on:
       - postgrest
     networks:

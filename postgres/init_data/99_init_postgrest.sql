@@ -1,16 +1,20 @@
--- anonymous user for postgrest. This user will not have
--- any permission whatsoever, but will be able to connect.
-create role web_anon nologin;
+-- -- anonymous user for postgrest. This user will not have
+-- -- any permission whatsoever, but will be able to connect.
+CREATE ROLE web_anon NOINHERIT NOLOGIN;
+--
+-- -- user for the formbackend. This user must have full access
+-- -- to the tables and schemas the formbackend needs to interact with.
+CREATE ROLE formbackend NOINHERIT NOLOGIN;
 
--- user for the formbackend. This user must have full access
--- to the tables and schemas the formbackend needs to interact with.
-create role formbackend nologin;
+CREATE ROLE authenticator LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
 
-grant USAGE on schema sampledata to formbackend;
-grant SELECT, INSERT, UPDATE, DELETE on all tables in schema sampledata to formbackend;
-grant all on all sequences in schema sampledata to formbackend;
+GRANT USAGE ON SCHEMA sampledata TO formbackend;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA sampledata TO formbackend;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA sampledata TO formbackend;
 
--- password will be replaced by init script
-create role authenticator noinherit login password 'Remm(quemtyikIcNetutOajIjOtUd0';
-grant web_anon to authenticator;
-grant formbackend to authenticator;
+GRANT USAGE ON SCHEMA sampledata TO web_anon;
+GRANT SELECT ON ALL TABLES IN SCHEMA sampledata TO web_anon;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA sampledata TO web_anon;
+
+GRANT web_anon TO authenticator;
+GRANT formbackend TO authenticator;
