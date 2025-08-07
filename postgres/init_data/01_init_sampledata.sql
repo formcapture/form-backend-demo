@@ -216,18 +216,18 @@ ALTER TABLE ONLY sampledata.fountains
 
 
 ALTER TABLE ONLY sampledata.fountains_contacts
-    ADD CONSTRAINT fountains_contacts_fk FOREIGN KEY (fountain_id) REFERENCES sampledata.fountains(id);
+    ADD CONSTRAINT fountains_contacts_fk FOREIGN KEY (fountain_id) REFERENCES sampledata.fountains(id) ON DELETE CASCADE;
 
 
 ALTER TABLE ONLY sampledata.fountains_contacts
-    ADD CONSTRAINT fountains_contacts_fk_1 FOREIGN KEY (contact_id) REFERENCES sampledata.contacts(id);
+    ADD CONSTRAINT fountains_contacts_fk_1 FOREIGN KEY (contact_id) REFERENCES sampledata.contacts(id) ON DELETE CASCADE;
 
 
 ALTER TABLE ONLY sampledata.fountains
-    ADD CONSTRAINT fountains_fk FOREIGN KEY (type) REFERENCES sampledata.fountain_types(id);
+    ADD CONSTRAINT fountains_fk FOREIGN KEY (type) REFERENCES sampledata.fountain_types(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY sampledata.fountains_pictures
-    ADD CONSTRAINT fountains_pictures_fk FOREIGN KEY (fountain_id) REFERENCES sampledata.fountains(id);
+    ADD CONSTRAINT fountains_pictures_fk FOREIGN KEY (fountain_id) REFERENCES sampledata.fountains(id) ON DELETE CASCADE;
 
 
 CREATE TABLE sampledata.inspections (
@@ -248,7 +248,7 @@ ALTER TABLE ONLY sampledata.inspections
     ADD CONSTRAINT inspections_pk PRIMARY KEY (id);
 
 ALTER TABLE ONLY sampledata.inspections
-    ADD CONSTRAINT fountains_fk_1 FOREIGN KEY (fountain_id) REFERENCES sampledata.fountains(id);
+    ADD CONSTRAINT fountains_fk_1 FOREIGN KEY (fountain_id) REFERENCES sampledata.fountains(id) ON DELETE CASCADE;
 
 CREATE SEQUENCE sampledata.inspections_id_seq
     AS integer
@@ -278,7 +278,7 @@ ALTER TABLE ONLY sampledata.inspections_contacts
     ADD CONSTRAINT inspections_contacts_un UNIQUE (inspection_id, contact_id);
 
 ALTER TABLE ONLY sampledata.inspections_contacts
-    ADD CONSTRAINT inspections_contacts_fk FOREIGN KEY (inspection_id) REFERENCES sampledata.inspections(id);
+    ADD CONSTRAINT inspections_contacts_fk FOREIGN KEY (inspection_id) REFERENCES sampledata.inspections(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY sampledata.inspections_contacts
-    ADD CONSTRAINT inspections_contacts_fk_1 FOREIGN KEY (contact_id) REFERENCES sampledata.contacts(id);
+    ADD CONSTRAINT inspections_contacts_fk_1 FOREIGN KEY (contact_id) REFERENCES sampledata.contacts(id) ON DELETE CASCADE;

@@ -164,8 +164,8 @@
     "item": true
   },
   "access": {
-    "read": true,
-    "write": true
+    "read": ["fountains_editor"],
+    "write": ["fountains_editor"]
   },
   "includedProperties": [
     "id",
