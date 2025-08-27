@@ -111,5 +111,11 @@ echo "Setting up authenticator user in postgres 🔑 ..."
 ESCAPED_PGRST_PASSWORD=$(printf '%s' "$PGRST_DB_PASSWORD" | sed "s/'/''/g")
 docker compose exec db psql -U postgres -c "ALTER USER authenticator WITH PASSWORD '${ESCAPED_PGRST_PASSWORD}';"
 
+echo "Run migrations..."
+for sql_file in postgres/migrations/*.sql; do
+  echo "Running migration: $(basename $sql_file)"
+  docker compose exec db psql -U postgres -f "/migrations/$(basename $sql_file)"
+done
+
 docker compose down
 echo "Project initialized successfully! 🎉"

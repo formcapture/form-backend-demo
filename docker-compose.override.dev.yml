@@ -53,6 +53,8 @@ services:
   db:
     ports:
       - "6666:5432"
+    volumes:
+      - ${PWD}/postgres/migrations:/migrations
   keycloak:
     volumes:
       - ${PWD}/keycloak/init_data/:/opt/keycloak/data/import/:ro
