@@ -70,7 +70,7 @@ services:
 
   postgrest:
     container_name: ${COMPOSE_PROJECT_NAME}-postgrest
-    image: postgrest/postgrest:v13.0.7
+    image: postgrest/postgrest:v14.0
     environment:
       PGRST_DB_URI: ${PGRST_DB_URI}
       # TODO check which value should be used here
