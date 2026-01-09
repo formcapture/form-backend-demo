@@ -25,7 +25,7 @@ RUN sed -i 's/return folderName;/return stableVersionNumber;/g' devtools/tasks/g
 RUN npm ci && echo "" | npm run build
 
 # webserver stage
-FROM nginx:1.29.2-alpine-slim@sha256:a96e1fcef85d6f8ff094582dcfd9996911d705e1682afd21668c08fac0a28fba
+FROM nginx:1.29.4-alpine-slim@sha256:a5459dbb9ed17c9f1eff5448a5dfb22ea3eb386a356e26fc16871dc426ac5383
 
 ARG GIT_COMMIT
 ARG APP_VERSION
