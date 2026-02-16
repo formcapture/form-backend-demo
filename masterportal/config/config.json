@@ -47,7 +47,7 @@
             }
           ]
         },
-        "expandable": {}
+        "expandable": { }
       }
     },
     "portalFooter": {
@@ -72,13 +72,13 @@
         [
           {
             "type": "embedit",
-            "url": "/form-backend/app/?view=table&formId=fountains",
+            "url": "/form-backend/app/?view=table&formId=fountains_minimal",
             "defaultStyleId": "default-blue",
             "highlightStyleId": "highlight",
             "drawStyleId": "draw",
             "drawIndicatorStyleId": "drawIndicator",
             "hoverStyleId": "hover",
-            "styleId": ["default-blue", "highlight", "draw", "hover", "drawIndicator"]
+            "styleId": [ "default-blue", "highlight", "draw", "hover", "drawIndicator" ]
           }
         ]
       ],
