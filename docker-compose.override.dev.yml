@@ -14,8 +14,21 @@ services:
       - "auth.form-backend.local:${HOST_IP}"
       - "app.form-backend.local:${HOST_IP}"
     environment:
-      KC_AUTH_SERVER_URL: https://auth.${HOSTNAME}/auth
+      KC_AUTH_SERVER_URL: http://keycloak:8080/auth
+      KC_PUBLIC_URL: https://auth.${HOSTNAME}/auth
       NODE_TLS_REJECT_UNAUTHORIZED: 0
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      postgrest:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/app/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: on-failure:5
   mkcert:
     container_name: ${COMPOSE_PROJECT_NAME}-mkcert
     image: vishnunair/docker-mkcert
@@ -33,6 +46,7 @@ services:
     depends_on:
       - mkcert
       - keycloak
+      - form-backend
     environment:
       FORMCAPTURE_HOST: ${HOSTNAME}
     image: nginx:1.28-alpine-slim

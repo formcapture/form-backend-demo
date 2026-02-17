@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+
 # remove existing .env file if it exists
 if [ -f .env ]; then
   echo "Remove existing .env file to initialize the project again."
@@ -11,12 +12,15 @@ if [ ! -f .env ]; then
   cp .env.example .env
 fi
 
+# update HOST_IP in .env file with the actual host IP address
 HOST_IP=$(ip route get 1 | awk '{gsub("^.*src ",""); print $1; exit}')
 sed -i -E "s/HOST_IP=(.+)/HOST_IP=${HOST_IP}/" .env
 
+# update POSTGRES_PASSWORD and KEYCLOAK_PASSWORD in .env file with random generated passwords
 sed -i -E "s/POSTGRES_PASSWORD=(.+)/POSTGRES_PASSWORD=$(pwgen 19 1 -s)/" .env
 sed -i -E "s/KEYCLOAK_PASSWORD=(.+)/KEYCLOAK_PASSWORD=$(pwgen 19 1 -s)/" .env
 
+# update PGRST_DB_PASSWORD in .env file with random generated password
 PGRST_DB_PASSWORD=$(pwgen 29 1 -s)
 sed -i -E "s/PGRST_DB_PASSWORD=(.+)/PGRST_DB_PASSWORD=${PGRST_DB_PASSWORD}/" .env
 
@@ -31,10 +35,12 @@ for arg in "$@"; do
   esac
 done
 
+# If the form backend base directory is not provided as a parameter, prompt the user to enter it
 if [ -z "$FORMCAPTURE_BASE_DIR" ]; then
   read -p "Enter the base directory of formcapture form-backend: " FORMCAPTURE_BASE_DIR
 fi
 
+# update FORMCAPTURE_BASE_DIR in .env file with the provided value
 sed -i -E "s/FORMCAPTURE_BASE_DIR=(.+)/FORMCAPTURE_BASE_DIR=$(echo $FORMCAPTURE_BASE_DIR | sed 's_/_\\/_g')/" .env
 
 # load predefined environment variables from .env file
@@ -47,7 +53,7 @@ docker compose up -d
 
 sleep 2
 
-echo "Waiting for keycloak to become healthy 😴..."
+echo "Waiting for keycloak to become healthy 😴... this might take a minute or two"
 until docker compose ps | grep keycloak | grep -q "(healthy)"; do
   sleep 5
   echo "Waiting 5 sec for keycloak health check ⏱️..."
