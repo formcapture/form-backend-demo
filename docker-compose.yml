@@ -89,12 +89,13 @@ services:
 
   form-backend:
     container_name: ${COMPOSE_PROJECT_NAME}-form-backend
-    image: ghcr.io/formcapture/form-backend:2.2.0
+    image: ghcr.io/formcapture/form-backend:3.0.0
     restart: unless-stopped
     environment:
       FILE_UPLOAD_DIR: ${FB_FILE_UPLOAD_DIR}
       FORM_CONFIGS_DIR: "form_configs"
-      KC_AUTH_SERVER_URL: https://${HOSTNAME}/auth
+      KC_AUTH_SERVER_URL: http://keycloak:8080/auth
+      KC_PUBLIC_URL: https://auth.${HOSTNAME}/auth
       KC_CLIENT_APP_ID: ${CLIENT_APP_ID}
       KC_PUBLIC_KEY: ${KEYCLOAK_PUBLIC_KEY}
       KC_REALM: ${KEYCLOAK_REALM}
@@ -110,6 +111,28 @@ services:
       - ${PWD}/form-backend/uploads:/form-backend/uploads
     depends_on:
       - postgrest
+      - keycloak
+    networks:
+      - app-network
+
+  nginx:
+    container_name: ${COMPOSE_PROJECT_NAME}-nginx
+    image: nginx:1.28-alpine-slim
+    depends_on:
+      - masterportal
+      - keycloak
+      - form-backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ${PWD}/nginx/proxy_params:/etc/nginx/proxy_params:ro
+      - ${PWD}/nginx/gzip.conf:/etc/nginx/gzip.conf:ro
+      - ${PWD}/nginx/ssl.conf:/etc/nginx/ssl.conf:ro
+      - ${PWD}/nginx/prod.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount your SSL certificates here:
+      # Expected files: cert.pem and cert-key.pem
+      - ${PWD}/nginx/certs/:/etc/nginx/certs/:ro
     networks:
       - app-network
 
