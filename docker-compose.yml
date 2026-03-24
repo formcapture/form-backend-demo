@@ -117,7 +117,7 @@ services:
 
   nginx:
     container_name: ${COMPOSE_PROJECT_NAME}-nginx
-    image: nginx:1.28-alpine-slim
+    image: nginx:1.29-alpine-slim
     depends_on:
       - masterportal
       - keycloak
