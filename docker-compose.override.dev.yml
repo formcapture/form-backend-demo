@@ -47,8 +47,6 @@ services:
       - mkcert
       - keycloak
       - form-backend
-    environment:
-      FORMCAPTURE_HOST: ${HOSTNAME}
     image: nginx:1.28-alpine-slim
     networks:
       - app-network
@@ -56,11 +54,8 @@ services:
       - "443:443"
       - "80:80"
     volumes:
-      - ${PWD}/nginx/proxy_params:/etc/nginx/proxy_params
       - ${PWD}/nginx/certs/:/etc/nginx/certs/:ro
-      - ${PWD}/nginx/gzip.conf:/etc/nginx/gzip.conf
-      - ${PWD}/nginx/ssl.conf:/etc/nginx/ssl.conf
-      - ${PWD}/nginx/dev.conf:/etc/nginx/templates/default.conf.template
+      - ${PWD}/nginx/generated.conf:/etc/nginx/conf.d/default.conf:ro
   keycloak-db:
     ports:
       - "5555:5432"
