@@ -49,6 +49,18 @@ set -o allexport
 source "$ENV_FILE"
 set +o allexport
 
+# Generate nginx config from template using envsubst
+echo "Generating nginx config from template..."
+mkdir -p nginx/certs
+# Only replace ${HOSTNAME} and ${HOST_IP}, leave nginx variables ($http_host, etc) untouched
+envsubst '${HOSTNAME}:${HOST_IP}' < nginx/dev_template.conf > /tmp/nginx_dev.conf.tmp
+if ! diff -q /tmp/nginx_dev.conf.tmp nginx/dev.conf 2>/dev/null; then
+  mv /tmp/nginx_dev.conf.tmp nginx/dev.conf
+  echo "Generated nginx config at nginx/dev.conf"
+else
+  rm /tmp/nginx_dev.conf.tmp
+fi
+
 docker compose up -d
 
 sleep 2
