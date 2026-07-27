@@ -55,7 +55,7 @@ services:
       - "80:80"
     volumes:
       - ${PWD}/nginx/certs/:/etc/nginx/certs/:ro
-      - ${PWD}/nginx/generated.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${PWD}/nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
   keycloak-db:
     ports:
       - "5555:5432"
