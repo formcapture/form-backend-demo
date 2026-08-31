@@ -89,7 +89,7 @@ services:
 
   form-backend:
     container_name: ${COMPOSE_PROJECT_NAME}-form-backend
-    image: ghcr.io/formcapture/form-backend:3.0.0
+    image: ghcr.io/formcapture/form-backend:3.1.0
     restart: unless-stopped
     environment:
       FILE_UPLOAD_DIR: ${FB_FILE_UPLOAD_DIR}
