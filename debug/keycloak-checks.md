@@ -50,6 +50,49 @@ The admin account for the live mode needs these `realm-management` client roles 
 
 ## 3. Running it
 
+### Where it runs and where the inputs come from
+
+The script runs on **any machine** with `bash`, `jq` and `curl` that can reach Keycloak over HTTP(S): your PC, a server or a CI job. It does not run inside a container and needs no access to the containers. All other inputs are optional; each one enables more checks. They only have to be available on the machine where you run the script:
+
+| Input (option) | Local demo (this repo) | Production with Docker Compose | Native installation |
+|---|---|---|---|
+| Keycloak URL (`--url`) | `https://auth.form-backend.local/auth` | `https://auth.<host>/auth` | URL of your Keycloak |
+| Admin credentials (`KC_ADMIN_*`) | `KEYCLOAK_USER` / `KEYCLOAK_PASSWORD` in `.env` | same | your Keycloak admin |
+| Form configs (`--form-configs`) | `form-backend/form_configs` in the repo | the directory mounted into the form-backend container (`FB_FORM_CONFIGS_DIR`) | the `form_configs` directory of form-backend |
+| PostgREST role claim key (`--role-claim-key`) | `PGRST_JWT_ROLE_CLAIM_KEY` in `.env` | same | `jwt-role-claim-key` in the PostgREST config, or `--postgrest-conf <file>` |
+| PostgREST JWKS (`--postgrest-jwks`) | `PGRST_JWT_SECRET` in `.env` | same | `jwt-secret` in the PostgREST config, or `--postgrest-conf <file>` |
+| form-backend values (`--public-url`, `--public-key`) | `https://auth.${HOSTNAME}/auth`, `KEYCLOAK_PUBLIC_KEY` in `.env` | same | `KC_PUBLIC_URL`, `KC_PUBLIC_KEY` of the form-backend service |
+
+`--postgrest-conf` is only for installations where PostgREST reads a **config file**. In the Docker setups PostgREST is configured with environment variables (`PGRST_*`), so there is no such file: pass `--role-claim-key` and `--postgrest-jwks` instead.
+
+### Local demo
+
+Run it from the root of this repository, **in bash** (with fish or zsh as login shell, start `bash` first: `set -a; source .env` does not work in fish), while the stack is running. Everything comes from `.env` and the repository; no extra files are needed:
+
+```bash
+set -a; source .env; set +a
+export KC_ADMIN_USER=$KEYCLOAK_USER KC_ADMIN_PASSWORD=$KEYCLOAK_PASSWORD
+./scripts/check-keycloak.sh \
+  --url "https://auth.${HOSTNAME}/auth" --realm "$KEYCLOAK_REALM" \
+  --cacert nginx/certs/rootCA.pem \
+  --app-client "$CLIENT_APP_ID" --postgrest-client "$PGRST_KEYCLOAK_CLIENT_ID" \
+  --form-configs form-backend/form_configs \
+  --role-claim-key "$PGRST_JWT_ROLE_CLAIM_KEY" \
+  --postgrest-jwks <(printf '%s' "$PGRST_JWT_SECRET") \
+  --public-url "https://auth.${HOSTNAME}/auth" \
+  --public-key "$KEYCLOAK_PUBLIC_KEY" \
+  --app-url "https://app.${HOSTNAME}/form-backend/app/" \
+  --portal-url "https://app.${HOSTNAME}/portal/demo/"
+```
+
+`--cacert` is needed because the demo certificate comes from the local mkcert CA (`nginx/certs/rootCA.pem`). Without it the script stops with `the TLS certificate of https://auth.form-backend.local is not trusted`. It is not needed if you trusted that CA system-wide (README, "Add and Trust the Root Certificate").
+
+The production setup with Docker Compose works the same way, from the deployment directory with its `.env`. Pass the CA of your certificate with `--cacert`, or leave the option out for a publicly trusted certificate.
+
+### Other setups
+
+The paths below are **examples** for a native installation. Replace them with the locations on your server.
+
 ```bash
 # live: credentials from the environment, or asked once (password without echo)
 export KC_ADMIN_USER=admin
@@ -75,7 +118,7 @@ export KC_ADMIN_USER=admin
 - `--public-url` and `--public-key` are the values from **form-backend's** environment (`KC_PUBLIC_URL`, `KC_PUBLIC_KEY`). `--public-key @file` reads it from a file. For form-backend ≤ 4.0.0, pass `KC_AUTH_SERVER_URL` as `--public-url`, because those versions check the issuer against it (section 5).
 - Instead of a user, the admin login can use a client: `KC_ADMIN_CLIENT_ID` / `KC_ADMIN_CLIENT_SECRET`.
 - For the service token without Admin API: `KC_CLIENT_SECRET` (environment only).
-- Self-signed certificates: `CURL_CA_BUNDLE=/path/to/ca.pem`.
+- Certificates from a private CA: `--cacert /path/to/ca.pem` (relative paths are resolved from the current directory; `CURL_CA_BUNDLE` also works).
 - Statuses, exit codes (`0` PASS, `1` WARN, `2` FAIL/ERROR, `3` usage/connection) and the log file (`--log`, default `./keycloak-check-<timestamp>.log`) work as in the database script. Secrets and passwords are never written to the console or log.
 
 ---

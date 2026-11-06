@@ -16,6 +16,9 @@ usage() {
   cat <<'EOF'
 Usage: check-keycloak.sh [options]
 
+Runs on any machine with bash, jq and curl that can reach Keycloak (not inside a container).
+All paths below are paths on that machine. Example for the local demo: debug/keycloak-checks.md, section 3.
+
 Source of the realm configuration (one of):
   --realm-file FILE          realm export (kc.sh export, or admin console "Partial export"
                              with groups/roles and clients)
@@ -24,6 +27,8 @@ Source of the realm configuration (one of):
                              KC_ADMIN_USER / KC_ADMIN_PASSWORD (password grant, admin-cli) or
                              KC_ADMIN_CLIENT_ID / KC_ADMIN_CLIENT_SECRET (client credentials); asks once if unset
   --admin-realm R            realm of the admin account (default: master)
+  --cacert FILE              CA certificate for Keycloak's TLS certificate, if it is not trusted system-wide
+                             (local demo: nginx/certs/rootCA.pem)
   Both --realm-file and --url: configuration from the file, public live checks against the URL.
 
 form-backend / PostgREST settings (names may differ from the demo):
@@ -32,9 +37,11 @@ form-backend / PostgREST settings (names may differ from the demo):
   --postgrest-client ID      client for the service token (POSTGREST_JWT_CLIENT_ID, default: postgrest-client)
   --db-role R                database role in the service token (default: formbackend)
   --form-configs DIR         form-backend form_configs/*.json: roles used in access.read/write
-  --postgrest-conf FILE      PostgREST config: jwt-role-claim-key, jwt-aud, jwt-secret (JWKS inline or @file)
-  --postgrest-jwks FILE      JWKS used by PostgREST (PGRST_JWT_SECRET), if not in --postgrest-conf
-  --role-claim-key KEY       PostgREST jwt-role-claim-key, if not in --postgrest-conf
+  --postgrest-conf FILE      PostgREST config file (native installations): jwt-role-claim-key, jwt-aud,
+                             jwt-secret (JWKS inline or @file). With Docker, PostgREST has no config file:
+                             use --role-claim-key and --postgrest-jwks with the PGRST_* values instead
+  --postgrest-jwks FILE      JWKS used by PostgREST (PGRST_JWT_SECRET), e.g. <(printf '%s' "$PGRST_JWT_SECRET")
+  --role-claim-key KEY       PostgREST jwt-role-claim-key (PGRST_JWT_ROLE_CLAIM_KEY)
   --public-url URL           form-backend KC_PUBLIC_URL (expected issuer of user tokens = URL/realms/<realm>;
                              form-backend <= 4.0.0 checks against KC_AUTH_SERVER_URL instead: pass that value)
   --public-key KEY|@FILE     form-backend KC_PUBLIC_KEY
@@ -45,7 +52,7 @@ form-backend / PostgREST settings (names may differ from the demo):
   --help                     show this help
 
 Service token check: KC_CLIENT_SECRET (env) or, with Admin API access, read from Keycloak (never printed).
-Self-signed certificates: CURL_CA_BUNDLE=/path/to/ca.pem
+Certificates from a private CA (e.g. the local demo): --cacert FILE (or CURL_CA_BUNDLE=FILE)
 EOF
 }
 
@@ -55,6 +62,7 @@ APP_CLIENT=form-backend-app PG_CLIENT=postgrest-client DB_ROLE=formbackend
 FORM_CONFIGS="" POSTGREST_CONF="" PGRST_JWKS_FILE="" CLAIM_KEY="" PUBLIC_URL="" PUBLIC_KEY=""
 APP_URL="" PORTAL_URL="" TEST_USER=""
 LOG_FILE="./keycloak-check-$(date +%Y%m%d-%H%M%S).log"
+CA_FILE=""
 
 need_arg() { [[ $# -ge 2 && -n "$2" ]] || { echo "option $1 needs a value" >&2; exit 3; }; }
 while [[ $# -gt 0 ]]; do
@@ -76,12 +84,21 @@ while [[ $# -gt 0 ]]; do
     --portal-url)        need_arg "$@"; PORTAL_URL=$2; shift 2 ;;
     --test-user)         need_arg "$@"; TEST_USER=$2; shift 2 ;;
     --log)               need_arg "$@"; LOG_FILE=$2; shift 2 ;;
+    --cacert)            need_arg "$@"; CA_FILE=$2; shift 2 ;;
     --help)              usage; exit 0 ;;
     *) echo "unknown option: $1 (see --help)" >&2; exit 3 ;;
   esac
 done
 
 command -v jq >/dev/null || { echo "jq is required" >&2; exit 3; }
+# CA for the Keycloak certificate: --cacert wins over CURL_CA_BUNDLE; both are checked up front
+CURL_TLS=()
+CA_FILE=${CA_FILE:-${CURL_CA_BUNDLE:-}}
+if [[ -n "$CA_FILE" ]]; then
+  [[ -r "$CA_FILE" ]] || { echo "CA file not readable: $CA_FILE (relative paths are resolved from $(pwd))" >&2; exit 3; }
+  CA_FILE=$(cd "$(dirname "$CA_FILE")" && pwd)/$(basename "$CA_FILE")
+  CURL_TLS=(--cacert "$CA_FILE")
+fi
 [[ -n "$REALM_FILE" || -n "$KC_URL" ]] || { echo "give --realm-file and/or --url (see --help)" >&2; exit 3; }
 [[ -z "$KC_URL" ]] || command -v curl >/dev/null || { echo "--url needs curl" >&2; exit 3; }
 [[ -z "$REALM_FILE" || -r "$REALM_FILE" ]] || { echo "cannot read $REALM_FILE" >&2; exit 3; }
@@ -177,9 +194,17 @@ decode_jwt() {  # JWT payload as JSON
 # http METHOD URL [curl args...] → body on stdout; the status code is read with $(status)
 # (http runs in a command substitution, so the code goes through a file, not a variable)
 http() {
-  local method=$1 url=$2 out; shift 2
-  if ! out=$(curl -sS -m 20 -X "$method" -w $'\n%{http_code}' "$@" "$url" 2>&1); then
-    echo 000 > "$WORK/status"; printf '%s' "$out"; return 1
+  local method=$1 url=$2 out rc; shift 2
+  out=$(curl -sS -m 20 "${CURL_TLS[@]}" -X "$method" -w $'\n%{http_code}' "$@" "$url" 2>&1); rc=$?
+  if (( rc != 0 )); then
+    echo 000 > "$WORK/status"
+    out=${out%$'\n'000}   # write-out of the failed request
+    case $rc in
+      60) out+=$'\n'"→ the TLS certificate of $(origin_of "$url") is not trusted: pass the CA with --cacert FILE (local demo: --cacert nginx/certs/rootCA.pem)" ;;
+      6)  out+=$'\n'"→ host not found: check the URL (and /etc/hosts for the local demo)" ;;
+      7)  out+=$'\n'"→ connection refused: is Keycloak running and reachable from this machine?" ;;
+    esac
+    printf '%s' "$out"; return 1
   fi
   printf '%s' "${out##*$'\n'}" > "$WORK/status"
   printf '%s' "${out%$'\n'*}"
@@ -204,7 +229,12 @@ admin_login() {
   fi
   ADMIN_TOKEN=$(jq -r '.access_token // empty' <<< "$body" 2>/dev/null)
   if [[ -z "$ADMIN_TOKEN" ]]; then
-    say "${C_RED}admin login failed (HTTP $(status)):${C_OFF} $(jq -r '.error_description // .error // empty' <<< "$body" 2>/dev/null || head -c 200 <<< "$body")"
+    # HTTP 000 = curl error (TLS, DNS, connection): show the full message incl. the hint
+    if [[ "$(status)" == 000 ]]; then
+      say "${C_RED}admin login failed:${C_OFF} $body"
+    else
+      say "${C_RED}admin login failed (HTTP $(status)):${C_OFF} $(jq -r '.error_description // .error // empty' <<< "$body" 2>/dev/null || head -c 200 <<< "$body")"
+    fi
     exit 3
   fi
 }
