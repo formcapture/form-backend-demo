@@ -63,6 +63,18 @@ sudo update-ca-certificates --fresh
 127.0.0.1  app.form-backend.local
 ```
 
+## Debugging the Database and Keycloak
+
+For a short introduction to how form-backend reads and writes data (form-backend → PostgREST → PostGIS, roles, privileges), see [debug/data-access-overview.md](debug/data-access-overview.md).
+
+Roles, grants, constraints and the data path form-backend → PostgREST → PostGIS are described in [debug/database-debug.md](debug/database-debug.md), with tested debug SQL and HTTP calls.
+
+For production deployments, [debug/database-permission-checks-production.md](debug/database-permission-checks-production.md) has a read-only check suite for permission errors.
+
+For installations without Docker (native PostgreSQL, no `.env`), use [debug/database-permission-checks-native.md](debug/database-permission-checks-native.md) and the standalone script [scripts/check-db-permissions.sh](scripts/check-db-permissions.sh).
+
+The Keycloak side (clients, roles, service account, token issuer and keys) is checked by [scripts/check-keycloak.sh](scripts/check-keycloak.sh), see [debug/keycloak-checks.md](debug/keycloak-checks.md). It works with a realm export or against a running Keycloak.
+
 ## Integrate with Masterportal
 
 A basic demo config is included to demonstrate the integration with a Masterportal instance: `https://app.form-backend.local/portal/demo/`.

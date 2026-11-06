@@ -7,7 +7,7 @@
 #
 # Exit code: 0 = all PASS, 1 = WARN only, 2 = at least one FAIL or ERROR, 3 = usage/connection error.
 #
-# See docs/database-permission-checks-native.md for details on every check.
+# See debug/database-permission-checks-native.md for details on every check.
 
 set -uo pipefail
 

@@ -2,6 +2,8 @@
 
 This guide is for deployments **without Docker**: PostgreSQL is installed natively, PostgREST and form-backend run as services, and there is **no central `.env` file**. It ships with a standalone script, [`scripts/check-db-permissions.sh`](../scripts/check-db-permissions.sh), which runs every permission check, prints a status for each one, and writes everything to a log file.
 
+The Keycloak side (clients, roles, service account, token issuer and keys) has its own script with the same output format: [`scripts/check-keycloak.sh`](../scripts/check-keycloak.sh), see [keycloak-checks.md](keycloak-checks.md).
+
 The checks are the same as in the Docker variant ([database-permission-checks-production.md](database-permission-checks-production.md)). This one adds checks for the problems found in customer deployments:
 
 | Problem seen in the field | Symptom | Check |
