@@ -1,5 +1,5 @@
 # build stage
-FROM node:20.19.2-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8 AS build
+FROM node:22.23.5-alpine@sha256:1314fb30ec37592d5845e5a160d522c0e680972aa534549940b8d73bde88481a AS build
 
 # libs are needed to build the masterportal
 RUN apk update && apk add --no-cache --virtual .gyp \
@@ -15,17 +15,19 @@ RUN apk update && apk add --no-cache --virtual .gyp \
 
 WORKDIR /masterportal
 
-ARG MP_TAG=3.11.0
+ARG MP_TAG=3.17.1
 
 RUN git clone https://geowerkstatt-hamburg@bitbucket.org/geowerkstatt-hamburg/masterportal.git . && git checkout v${MP_TAG}
 RUN git clone https://github.com/formcapture/masterportal-addons.git masterportal-addons && cp -r masterportal-addons/addons/* addons/
 
 # Always use version as folder name
-RUN sed -i 's/return folderName;/return stableVersionNumber;/g' devtools/tasks/getMastercodeVersionFolderName.js
-RUN npm ci && echo "" | npm run build
+RUN sed -i -E 's/return folderName(\.replace\(.*\))?;/return stableVersionNumber;/' devtools/tasks/getMastercodeVersionFolderName.js \
+    && grep -q 'return stableVersionNumber;' devtools/tasks/getMastercodeVersionFolderName.js
+# canvas (native module) misses #include <cstdint>, which current GCC no longer includes implicitly
+RUN CXXFLAGS="-include cstdint" npm ci && echo "" | npm run build
 
 # webserver stage
-FROM nginx:1.29.4-alpine-slim@sha256:a5459dbb9ed17c9f1eff5448a5dfb22ea3eb386a356e26fc16871dc426ac5383
+FROM nginx:1.30.8-alpine-slim@sha256:e9eaa7298465eab06d618c51556fdcf3fb5061f9ff40bd28ee898fbd7ee7f900
 
 ARG GIT_COMMIT
 ARG APP_VERSION

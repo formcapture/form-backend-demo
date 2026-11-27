@@ -47,7 +47,7 @@ services:
       - mkcert
       - keycloak
       - form-backend
-    image: nginx:1.28-alpine-slim
+    image: nginx:1.30-alpine-slim
     networks:
       - app-network
     ports:

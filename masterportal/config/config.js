@@ -38,7 +38,7 @@ const Config = {
     },
     fallbackLanguage: "de",
     changeLanguageOnStartWhen: ["querystring", "localStorage", "htmlTag"],
-    loadPath: "/portal/mastercode/3_11_0/locales/{{lng}}/{{ns}}.json"
+    loadPath: "/portal/mastercode/3_17_1/locales/{{lng}}/{{ns}}.json"
   }
 };
 
