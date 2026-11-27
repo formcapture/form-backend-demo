@@ -24,7 +24,7 @@
         "relationship": "manyToMany",
         "via": {
           "tableName": "fountains_contacts",
-          "schema": "formbackend"
+          "schema": "sampledata"
         },
         "on": {
           "self": "fountain_id",
@@ -113,7 +113,7 @@
               },
               "via": {
                 "tableName": "inspections_contacts",
-                "schema": "formbackend"
+                "schema": "sampledata"
               },
               "on": {
                 "self": "inspection_id",
