@@ -36,7 +36,7 @@ services:
       domain: ${HOSTNAME}
     volumes:
       - ${PWD}/nginx/certs/:/root/.local/share/mkcert/
-    command: /bin/sh -c 'mkcert -install "*.form-backend.local" && for i in $$(echo $$domain | sed "s/,/ /g"); do [ ! -f /root/.local/share/mkcert/$$i.pem ] && mkcert $$i; done && tail -f -n0 /etc/hosts'
+    command: /bin/sh -c 'mkcert -install "*.form-backend.local" && for i in $$(echo $$domain | sed "s/,/ /g"); do [ -f /root/.local/share/mkcert/$$i.pem ] || mkcert $$i; done && tail -f -n0 /etc/hosts'
     healthcheck:
       test: ["CMD", "test", "-f", "/root/.local/share/mkcert/${HOSTNAME}.pem"]
       interval: 5s
