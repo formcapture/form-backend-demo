@@ -12,7 +12,7 @@ services:
 
   keycloak:
     container_name: ${COMPOSE_PROJECT_NAME}-keycloak
-    image: quay.io/keycloak/keycloak:26.3.3
+    image: quay.io/keycloak/keycloak:26.8.2
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_USER}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
@@ -61,7 +61,7 @@ services:
 
   db:
     container_name: ${COMPOSE_PROJECT_NAME}-db
-    image: postgis/postgis:17-3.5-alpine
+    image: postgis/postgis:17-3.7-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -73,7 +73,7 @@ services:
 
   postgrest:
     container_name: ${COMPOSE_PROJECT_NAME}-postgrest
-    image: postgrest/postgrest:v13.0.7
+    image: postgrest/postgrest:v16.6
     environment:
       PGRST_DB_URI: ${PGRST_DB_URI}
       # TODO check which value should be used here
@@ -117,7 +117,7 @@ services:
 
   nginx:
     container_name: ${COMPOSE_PROJECT_NAME}-nginx
-    image: nginx:1.28-alpine-slim
+    image: nginx:1.30-alpine-slim
     depends_on:
       - masterportal
       - keycloak
